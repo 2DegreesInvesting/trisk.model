@@ -19,8 +19,7 @@ calculate_annual_profits <- function(data,
                                      shock_scenario,
                                      end_year,
                                      discount_rate,
-                                     growth_rate,
-                                     log_path) {
+                                     growth_rate) {
   data <- data %>%
     dividend_discount_model(discount_rate = discount_rate) %>%
     calculate_terminal_value(

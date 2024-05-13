@@ -27,8 +27,7 @@ run_trisk <- function(input_path, output_path,
       baseline_scenario = baseline_scenario,
       shock_scenario = shock_scenario,
       start_year = start_year,
-      carbon_price_model = carbon_price_model,
-      log_path = log_path
+      carbon_price_model = carbon_price_model
       )
 
   output_list <- run_trisk_model(input_data_list, ...)
@@ -97,6 +96,8 @@ run_trisk_model <- function(input_data_list,
 
   cat("-- Calculating production trajectory under trisk shock. \n")
 
+  transition_scenario <- THIS_MUST_GO(input_data_list, baseline_scenario, shock_scenario, start_year, shock_year)
+
   input_data_list$full_trajectory <- calculate_trisk_trajectory(
     input_data_list = input_data_list,
     baseline_scenario = baseline_scenario,
@@ -104,8 +105,7 @@ run_trisk_model <- function(input_data_list,
     transition_scenario = transition_scenario,
     start_year = start_year,
     end_year = end_year,
-    time_horizon = time_horizon_lookup,
-    log_path = log_path
+    time_horizon = time_horizon_lookup
   )
 
   cat("-- Calculating net profits. \n")
@@ -125,8 +125,7 @@ run_trisk_model <- function(input_data_list,
     shock_scenario = shock_scenario,
     end_year = end_year,
     discount_rate = discount_rate,
-    growth_rate = growth_rate,
-    log_path = log_path
+    growth_rate = growth_rate
   )
 
   cat("-- Calculating market risk. \n")
@@ -155,4 +154,98 @@ run_trisk_model <- function(input_data_list,
       company_technology_npv = company_technology_npv
     )
   )
+}
+
+
+
+THIS_MUST_GO <- function(data, baseline_scenario, shock_scenario, start_year, shock_year){
+
+
+  get_end_year <- function(data, scenarios_filter){
+
+    available_min_of_max_years <- dplyr::bind_rows(
+      data$df_price %>%
+        dplyr::distinct(.data$year, .data$scenario) %>%
+        dplyr::group_by(.data$scenario) %>%
+        dplyr::summarise(year=max(.data$year)),
+      data$capacity_factors_power %>%
+        dplyr::distinct(.data$year, .data$scenario) %>%
+        dplyr::group_by(.data$scenario) %>%
+        dplyr::summarise(year=max(.data$year)),
+      data$scenario_data %>%
+        dplyr::distinct(.data$year, .data$scenario) %>%
+        dplyr::group_by(.data$scenario) %>%
+        dplyr::summarise(year=max(.data$year))
+    ) %>%
+      dplyr::group_by(.data$scenario) %>%
+      dplyr::summarise(year=min(.data$year)) %>%
+      dplyr::filter(.data$scenario %in% scenarios_filter) %>%
+      dplyr::pull(.data$year)
+
+    end_year <- min(MAX_POSSIBLE_YEAR, min(available_min_of_max_years))
+
+    return(end_year)
+
+  }
+    end_year <- get_end_year(
+    data, 
+    scenarios_filter=c(baseline_scenario, shock_scenario)
+    )
+    #' Generate transition scenario shock from a start year that represents when a
+#' large scale climate transition policy is deployed.
+#'
+#' @param start_of_analysis A numeric vector of length one that indicates the
+#'   start year of the analysis.
+#' @param end_of_analysis A numeric vector of length one that indicates the
+#'   end year of the analysis.
+#' @param shock_year A numeric vector of length 1 that provides the start year
+#'   of the shock to be used in the analysis.
+generate_transition_shocks <- function(start_of_analysis,
+                                       end_of_analysis,
+                                       shock_year) {
+  bounds <- list(start_of_analysis, end_of_analysis)
+
+  if (dplyr::n_distinct(purrr::map_int(bounds, length)) > 1) {
+    stop("Input arugments for start_of_analysis and end_of_analysis need to have length 1.")
+  }
+
+  input_args <- list(start_of_analysis, end_of_analysis, shock_year)
+
+  if (!all(unique(purrr::map_lgl(input_args, is.numeric)))) {
+    stop("All input arguments need to be numeric.")
+  }
+
+  if (shock_year < start_of_analysis) {
+    stop("Year of shock out of bounds. Shock cannot happen before the start year
+         of the anaylsis.")
+  }
+
+  if (shock_year > end_of_analysis) {
+    stop("Year of shock out of bounds. Shock cannot happen after the end year of
+         the anaylsis.")
+  }
+
+  data <- tibble::tibble(
+    year_of_shock = shock_year,
+    scenario_name = glue::glue("Carbon balance {year_of_shock}"),
+    duration_of_shock = end_of_analysis - .data$year_of_shock + 1
+  )
+
+  validate_data_has_expected_cols(
+    data = data,
+    expected_columns = c(
+      "scenario_name", "year_of_shock", "duration_of_shock"
+    )
+  )
+
+  return(data)
+}
+
+  transition_scenario <- generate_transition_shocks(
+    start_of_analysis = start_year,
+    end_of_analysis = end_year,
+    shock_year = shock_year
+  )
+
+  return(transition_scenario)
 }

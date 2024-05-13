@@ -11,8 +11,6 @@
 
 convert_cap_to_generation <- function(data,
                                       capacity_factors_power = NULL) {
-  force(data)
-  capacity_factors_power %||% stop("Must provide input for 'capacity_factors_power'", call. = FALSE)
 
   # ADO 1945 - Left join is applied since only rows in data from ald_sector
   # power will have matching rows in capacity_factors_power
@@ -64,17 +62,6 @@ convert_power_cap_to_generation <- function(data,
                                             capacity_factors_power = NULL,
                                             baseline_scenario,
                                             target_scenario) {
-  force(data)
-  capacity_factors_power %||% stop("Must provide input for 'capacity_factors_power'", call. = FALSE)
-
-  # ensure required scenarios for planned capacity and scenario capacity are given
-  if (
-    !baseline_scenario %in% unique(capacity_factors_power$scenario) |
-      !target_scenario %in% unique(capacity_factors_power$scenario)
-  ) {
-    stop(glue::glue("At least one input scenario from {baseline_scenario} or
-                    {target_scenario} is missing in power capacity factor data."))
-  }
 
   capacity_factors_power <- capacity_factors_power %>%
     dplyr::filter(.data$scenario %in% c(baseline_scenario, target_scenario)) %>%

@@ -20,8 +20,7 @@ calculate_trisk_trajectory <- function(input_data_list,
                                        transition_scenario,
                                        start_year,
                                        end_year,
-                                       time_horizon,
-                                       log_path) {
+                                       time_horizon) {
   production_data <- input_data_list$production_data %>%
     set_baseline_trajectory(
       baseline_scenario = baseline_scenario
@@ -32,8 +31,7 @@ calculate_trisk_trajectory <- function(input_data_list,
       target_scenario_aligned = target_scenario,
       start_year = start_year,
       end_year = end_year,
-      analysis_time_frame = time_horizon,
-      log_path = log_path
+      analysis_time_frame = time_horizon
     )
 
   price_data <- input_data_list$df_price %>%
@@ -49,7 +47,6 @@ calculate_trisk_trajectory <- function(input_data_list,
       y = input_data_list$financial_data,
       by = c("company_id")
     ) %>%
-    stop_if_empty(data_name = "Production data joined with Financial data") %>%
     fill_annual_profit_cols()
 
   full_trajectory <- full_trajectory %>%

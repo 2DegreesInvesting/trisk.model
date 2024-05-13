@@ -1,9 +1,18 @@
 Package: trisk.model
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+    person(given = "Jacob",
+           family = "Kastl",
+           role = c("aut"),
+           email = "jacob.kastl@gmail.com"),
+    person(given = "Franziska",
+           family = "Fischer",
+           role = c("aut", "cre"),
+           email = "franziska@2degrees-investing.org"),
+    person(given = "Theia Finance Labs",
+           role = c("cph", "fnd"),
+           email = "1in1000@theiafinance.org"))
 Description: The package provides functions and workflows for conducting
     financial stress tests of listed equity, corporate bond and corporate
     loan portfolios.  It specifically focuses on climate change related
