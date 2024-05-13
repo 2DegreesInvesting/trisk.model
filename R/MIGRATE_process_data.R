@@ -351,8 +351,7 @@ process_carbon_data <- function(data, start_year, end_year, carbon_price_model) 
 #' @noRd
 process_financial_data <- function(data) {
   data_processed <- data %>%
-    stop_if_empty(data_name = "Financial Data") %>%
-    check_financial_data()
+    stop_if_empty(data_name = "Financial Data") 
 
   return(data_processed)
 }

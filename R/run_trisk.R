@@ -18,9 +18,20 @@
 #' @inheritParams run_trisk_model
 run_trisk <- function(input_path, output_path,
                       return_results = FALSE, ...) {
-  input_data_list <- load_data(input_path) # TODO
+  
+  input_data_list <- st_read_agnostic(input_path)
 
-  output_list <- run_trisk_model(...)
+  input_data_list <- input_data_list %>%
+    st_process(
+      scenario_geography = scenario_geography,
+      baseline_scenario = baseline_scenario,
+      shock_scenario = shock_scenario,
+      start_year = start_year,
+      carbon_price_model = carbon_price_model,
+      log_path = log_path
+      )
+
+  output_list <- run_trisk_model(input_data_list, ...)
   company_pd_changes_overall <- output_list$company_pd_changes_overall
   company_trajectories <- output_list$company_annual_profits
   company_technology_npv <- output_list$company_technology_npv

@@ -12,7 +12,7 @@ st_read_agnostic <- function(
     capacity_factors_power = read_capacity_factors_power(file.path(dir, capacity_factor_file)),
     df_price = read_price_data(file.path(dir, price_data_file)),
     scenario_data = read_scenario_data(file.path(dir, scenario_data_file)),
-    financial_data = read_financial_data(ffile.path(dir, financial_data_file)),
+    financial_data = read_financial_data(file.path(dir, financial_data_file)),
     production_data = read_production_data(file.path(dir, production_data_file)),
     carbon_data <- read_carbon_data(file.path(dir, carbon_price_data_file))
   )
