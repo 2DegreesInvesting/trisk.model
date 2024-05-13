@@ -9,7 +9,6 @@
 #' @param shock_scenario shock_scenario
 #' @param start_year start_year
 #' @param carbon_price_model carbon_price_model
-#' @param log_path log_path
 #'
 #' @return processed input trisk data
 #'
@@ -19,16 +18,14 @@ st_process_agnostic <-
            baseline_scenario,
            shock_scenario,
            start_year,
-           carbon_price_model,
-           log_path) {
+           carbon_price_model) {
     processed <- data %>%
       st_process(
         scenario_geography = scenario_geography,
         baseline_scenario = baseline_scenario,
         shock_scenario = shock_scenario,
         start_year = start_year,
-        carbon_price_model = carbon_price_model,
-        log_path = log_path
+        carbon_price_model = carbon_price_model
       )
 
     input_data_list <- list(
@@ -40,25 +37,10 @@ st_process_agnostic <-
       carbon_data = processed$carbon_data
     )
 
-    # TODO: this requires company company_id to work for all companies, i.e. using 2021Q4 PAMS data
-    report_company_drops(
-      data_list = input_data_list,
-      log_path = log_path
-    )
-
     return(input_data_list)
   }
 
 
-is_scenario_geography_in_pacta_results <- function(data, scenario_geography_filter) {
-  if (!scenario_geography_filter %in% unique(data$scenario_geography)) {
-    stop(paste0(
-      "Did not find PACTA results for scenario_geography level ", scenario_geography_filter,
-      ". Please check PACTA results or pick another scenario_geography."
-    ))
-  }
-  invisible(data)
-}
 
 #' Remove rows from PACTA results that belong to company-sector combinations
 #' for which there is no positive production value in the relevant year of
@@ -74,8 +56,7 @@ is_scenario_geography_in_pacta_results <- function(data, scenario_geography_filt
 #' @noRd
 remove_sectors_with_missing_production_end_of_forecast <- function(data,
                                                                    start_year,
-                                                                   time_horizon,
-                                                                   log_path) {
+                                                                   time_horizon) {
   n_companies_pre <- length(unique(data$company_name))
 
   companies_missing_sector_production <- data %>%
